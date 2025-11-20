@@ -406,7 +406,8 @@ class Command:
         except:
             CdSw.msg_status_alt(f(_('Cannot create backup copy: invalid path "{}"'), sv_path), 6)
             return
-        CdSw.msg_status_alt(f(_('Create backup: {}'), sv_path), 3)
+        # CdSw.msg_status_alt(f(_('Create backup: {}'), sv_path), 3)
+        app.msg_status(f(_('Create backup: {}'), sv_path))
         pass;                   LOG and log('ok',())
        #def on_save_pre
 
