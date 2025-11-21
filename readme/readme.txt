@@ -1,5 +1,5 @@
 Plugin for CudaText.
-Creates backup copy of current file: 
+Creates backup copy of current file:
 - by command in Plugins,
 - by auto-creation on file saving.
 
@@ -15,5 +15,8 @@ Filename of copy - customizable via presets+variables. Variables:
 See the info, by pressing Help button in the Config dialog.
 
 
-Author: Andrey Kvichanskiy (kvichans, at forum/github)
+Authors:
+- Andrey Kvichanskiy (kvichans, at forum/github)
+- ildar r. khasanshin (@ildarkhasanshin on GitHub)
+
 License: MIT

@@ -1,3 +1,8 @@
+0.9.12 (2025-11-21)
++ support macros {APP_DIR_DATA}
++ open diff-tab
+* small fixes
+
 0.9.11 (2023-02-24)
 + support macros {APP_DIR} and {APP_DRIVE}
 - fixed: Help dialog memo was not read-only and had not fixed font
