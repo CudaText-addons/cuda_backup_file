@@ -185,7 +185,8 @@ def get_bk_path(path:str, dr_mask:str, fn_mask:str, ops='')->str:
     if '{COUNTER' not in fn_mask:
         return bk_path
 #       return bk_path.strip(os.sep)
-    mtch_w  = re.search('{COUNTER(\|lim:\d+)?(\|w:\d+)?}', fn_mask)
+    # mtch_w  = re.search('{COUNTER(\|lim:\d+)?(\|w:\d+)?}', fn_mask)
+    mtch_w  = re.search(r'{COUNTER(\|lim:\d+)?(\|w:\d+)?}', fn_mask)
     if not mtch_w:
         return bk_path
 #       return bk_path.strip(os.sep)
@@ -356,7 +357,18 @@ class Command:
             diff        = diff.replace('{APP_DIR_DATA}' , app_dir_data)
             pass;               LOG and log('diff={}', (diff))
             print('Backup File runs:', diff)
-            subprocess.Popen(diff, shell=vrn_data['dfsh'])
+            # subprocess.Popen(diff, shell=vrn_data['dfsh'])
+            sp = subprocess.Popen(diff, shell=vrn_data['dfsh'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdout_output, stderr_output = sp.communicate()
+            if sp.returncode == 0:
+                print('Backup File: these files are unchanged.')
+            else:
+                app.file_open('')
+                ed.set_text_all(stdout_output.decode())
+                ed.set_prop(app.PROP_LEXER_FILE, 'Diff')
+                ed.set_prop(app.PROP_RO, True)
+                ed.set_prop(app.PROP_TAB_TITLE, 'Diff')
+                ed.set_prop(app.PROP_SAVE_HISTORY, False)
             return
 
         # Copy
