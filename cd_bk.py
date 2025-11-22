@@ -3,7 +3,7 @@ Authors:
     Andrey Kvichansky    (kvichans on github.com)
     Alexey Torgashin (CudaText)
 Version:
-    '0.9.11 2023-02-24'
+    '0.9.12 2025-11-21'
 ToDo: (see end of file)
 '''
 
@@ -66,6 +66,7 @@ def width(s, w):
 
 app_dir = app.app_path(app.APP_DIR_EXE)
 app_drv = app_dir[:2] if (os.name=='nt' and app_dir[1]==':') else ''
+app_dir_data = app.app_path(app.APP_DIR_DATA)
 
 def get_bk_path(path:str, dr_mask:str, fn_mask:str, ops='')->str:
     """ Calculation of path for backup.
@@ -82,11 +83,12 @@ def get_bk_path(path:str, dr_mask:str, fn_mask:str, ops='')->str:
             {YY} {YYYY}             Year    as  '17' or '2017 '
             {M} {MM} {MMM} {MMMM}   Month   as  '7' or '07' or 'jul' or 'july'
             {D} {DD}                Day     as  '7' or '07'
-            {h} {hh}                Hours   as  '7' or '07' 
-            {m} {mm}                Minutes as  '7' or '07' 
+            {h} {hh}                Hours   as  '7' or '07'
+            {m} {mm}                Minutes as  '7' or '07'
             {s} {ss}                Seconds as  '7' or '07'
             {APP_DIR}               CudaText folder path
             {APP_DRIVE}             CudaText drive/disk letter (Windows only)
+            {APP_DIR_DATA}          CudaText data-folder
         Supported filters in macros             (path = 'p1/p2/p3/stem.ext')
             {VAR|parent:level} - cut path, default level is 1
             {VAR|name}         - last segment of path
@@ -127,6 +129,7 @@ def get_bk_path(path:str, dr_mask:str, fn_mask:str, ops='')->str:
                   ,ss       =f('{:02}', nw.second)
                   ,APP_DIR  =app_dir
                   ,APP_DRIVE=app_drv
+                  ,APP_DIR_DATA=app_dir_data
                   )
     mkv.update(get_proj_vars())
     FILTER_REDUCTS={
@@ -138,7 +141,7 @@ def get_bk_path(path:str, dr_mask:str, fn_mask:str, ops='')->str:
     def fltrd_to(mcr_flt, base_val):
         """ Apply filter[s] for
                 NM|func1[:par1,par2[|func2]]
-            as func2(func1(base_val,par1,par2)) 
+            as func2(func1(base_val,par1,par2))
         """
         pass;                  #LOG and log('mcr_flt, base_val={}',(mcr_flt, base_val))
         flt_val     = base_val
@@ -182,7 +185,8 @@ def get_bk_path(path:str, dr_mask:str, fn_mask:str, ops='')->str:
     if '{COUNTER' not in fn_mask:
         return bk_path
 #       return bk_path.strip(os.sep)
-    mtch_w  = re.search('{COUNTER(\|lim:\d+)?(\|w:\d+)?}', fn_mask)
+    # mtch_w  = re.search('{COUNTER(\|lim:\d+)?(\|w:\d+)?}', fn_mask)
+    mtch_w  = re.search(r'{COUNTER(\|lim:\d+)?(\|w:\d+)?}', fn_mask)
     if not mtch_w:
         return bk_path
 #       return bk_path.strip(os.sep)
@@ -191,8 +195,8 @@ def get_bk_path(path:str, dr_mask:str, fn_mask:str, ops='')->str:
     wdth    = int(mtch_w.group(2)[len('|w:'  ):])   if mtch_w.group(2) else 0
     pass;                      #LOG and log('fn_mask, re.compile={}',(fn_mask,fn_mask[:mtch_w.start()]
                                #                                     ,f(r'(\d{})', '{'+str(wdth)+'}' if wdth else '+'),fn_mask[mtch_w.end():]))
-    cntd_re = re.compile(re.escape(fn_mask[:mtch_w.start()]) 
-                        +f(r'(\d{})', '{'+str(wdth)+'}' if wdth else '+') 
+    cntd_re = re.compile(re.escape(fn_mask[:mtch_w.start()])
+                        +f(r'(\d{})', '{'+str(wdth)+'}' if wdth else '+')
                         +re.escape(fn_mask[mtch_w.end():]))
     best_cnt    = -1
     best_dt     = 0
@@ -246,7 +250,7 @@ class Command:
                           '\nThe command will use old state.'
                         '\n\nContinue?')
                            ,app.MB_YESNO+app.MB_ICONQUESTION
-                           )!=app.ID_YES:   return 
+                           )!=app.ID_YES:   return
 
         vrn_data    = load_cfg(ops='vrn_data')
         if not vrn_data.get('mask'):
@@ -302,8 +306,8 @@ class Command:
 
         opdf    = vrn_data.get('opdf', self.def_opdf)
         if opdf:
-            prevs_a = list( (f, os.path.getmtime(sv_dir+os.sep+f)) 
-                            for f in files 
+            prevs_a = list( (f, os.path.getmtime(sv_dir+os.sep+f))
+                            for f in files
                             if re_mask.match(f)
                         )
             pass;              #log('prevs_a={}', prevs_a)
@@ -335,7 +339,7 @@ class Command:
                     if menu_l[what_m].startswith(_('more…')):
                         prevs   = prevs_a
                         continue
-                    what_p  = what_m - 2 
+                    what_p  = what_m - 2
                     break
         pass;                  #log('what={}'.format(what))
         pass;                  #return
@@ -350,11 +354,23 @@ class Command:
             diff        = diff.replace('{FILE_PATH}'    , cf_path)
             diff        = diff.replace('{APP_DIR}'      , app_dir)
             diff        = diff.replace('{APP_DRIVE}'    , app_drv)
+            diff        = diff.replace('{APP_DIR_DATA}' , app_dir_data)
             pass;               LOG and log('diff={}', (diff))
             print('Backup File runs:', diff)
-            subprocess.Popen(diff, shell=vrn_data['dfsh'])
+            # subprocess.Popen(diff, shell=vrn_data['dfsh'])
+            sp = subprocess.Popen(diff, shell=vrn_data['dfsh'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdout_output, stderr_output = sp.communicate()
+            if sp.returncode == 0:
+                print('Backup File: these files are unchanged.')
+            else:
+                app.file_open('')
+                ed.set_text_all(stdout_output.decode())
+                ed.set_prop(app.PROP_LEXER_FILE, 'Diff')
+                ed.set_prop(app.PROP_RO, True)
+                ed.set_prop(app.PROP_TAB_TITLE, 'Diff')
+                ed.set_prop(app.PROP_SAVE_HISTORY, False)
             return
-        
+
         # Copy
         while True:
             CdSw.msg_status_alt(f(_('Backup dir: {}'), sv_dir), 60)
@@ -402,7 +418,8 @@ class Command:
         except:
             CdSw.msg_status_alt(f(_('Cannot create backup copy: invalid path "{}"'), sv_path), 6)
             return
-        CdSw.msg_status_alt(f(_('Create backup: {}'), sv_path), 3)
+        # CdSw.msg_status_alt(f(_('Create backup: {}'), sv_path), 3)
+        app.msg_status(f(_('Create backup: {}'), sv_path))
         pass;                   LOG and log('ok',())
        #def on_save_pre
 
@@ -421,11 +438,11 @@ class Command:
                 del lst[max_len:]
             return lst
            #def add_to_history
-        
+
         # Currenf file
         cf_path = ed.get_filename()
         cf_path = cf_path if os.path.isfile(cf_path) else DEMO_PATH
-        
+
         # Stored options and its copies
         #   Level 0: into file CFG_JSON             (between calls)
         #   Level 1: into stores, all_vrns, vrn_*   (content of/for file)
@@ -461,7 +478,7 @@ class Command:
                   '\r    {FILE_PATH} - path of current file.')
         dfmx_h  = _('How many copies will be shown to compare'
                   '\r    0 - all')
-        
+
         stores['wher_hist'] = add_to_history(vds['wher'], stores.get('wher_hist', []), MAX_HIST, unicase=(os.name=='nt'))
         stores['mask_hist'] = add_to_history(vds['mask'], stores.get('mask_hist', []), MAX_HIST, unicase=(os.name=='nt'))
         stores['diff_hist'] = add_to_history(vds['diff'], stores.get('diff_hist', []), MAX_HIST, unicase=(os.name=='nt'))
@@ -511,7 +528,7 @@ class Command:
                           ,d4mo=dmo_path
                           ,vrns=vrn_num
                           ))
-            
+
             g1          = 0 if adva    else -60
             g2          = apx.icase(not adva and not vds['svon'], -120
                                    ,not adva and     vds['svon'],  -60
@@ -520,61 +537,61 @@ class Command:
             DLGH,DLGW   = DLG_H+  g1+g2, DLG_W
             pass;              #LOG and log('vals={}',(vals))
             cnts=([]
-                    +([] 
-                 +[dict(           tp='lb'  ,t=  5      ,l=5+120        ,w=180  ,cap=_('Options for manual backup')                 )] # 
-                    if not adva else []                        
-                 +[dict(           tp='lb'  ,tid='opdf' ,l=5+120        ,w=180  ,cap=_('Options for manual backup')                 )] # 
+                    +([]
+                 +[dict(           tp='lb'  ,t=  5      ,l=5+120        ,w=180  ,cap=_('Options for manual backup')                 )] #
+                    if not adva else []
+                 +[dict(           tp='lb'  ,tid='opdf' ,l=5+120        ,w=180  ,cap=_('Options for manual backup')                 )] #
                  +[dict(cid='opdf',tp='ch'  ,t=  3      ,l=5+400        ,w=170  ,cap=_('and to c&ompare')           ,act=1          )] # &o
                     )
-                 +[dict(           tp='lb'  ,tid='wher' ,l=5            ,w=120  ,cap=_('Copy to &dir:')                             )] # &d 
+                 +[dict(           tp='lb'  ,tid='wher' ,l=5            ,w=120  ,cap=_('Copy to &dir:')                             )] # &d
                  +[dict(cid='wher',tp='cb'  ,t= 25      ,l=5+120        ,w=500  ,items=wher_l                                       )] #
-                 +[dict(cid='v4wh',tp='bt'  ,tid='wher' ,l=5+120+500+ 5 ,w= 80  ,cap=_('Add &var')                                  )] # &v 
-                 +[dict(cid='b4wh',tp='bt'  ,tid='wher' ,l=5+620+ 80+10 ,w= 35  ,cap=_('…')                                         )] #  
-                 +[dict(           tp='lb'  ,tid='mask' ,l=5            ,w=120  ,cap=_('Planned &name:')                            )] # &n 
+                 +[dict(cid='v4wh',tp='bt'  ,tid='wher' ,l=5+120+500+ 5 ,w= 80  ,cap=_('Add &var')                                  )] # &v
+                 +[dict(cid='b4wh',tp='bt'  ,tid='wher' ,l=5+620+ 80+10 ,w= 35  ,cap=_('…')                                         )] #
+                 +[dict(           tp='lb'  ,tid='mask' ,l=5            ,w=120  ,cap=_('Planned &name:')                            )] # &n
                  +[dict(cid='mask',tp='cb'  ,t= 55      ,l=5+120        ,w=500  ,items=mask_l                                       )] #
-                 +[dict(cid='v4ma',tp='bt'  ,tid='mask' ,l=5+120+500+ 5 ,w= 80  ,cap=_('Add v&ar')                                  )] # &a 
+                 +[dict(cid='v4ma',tp='bt'  ,tid='mask' ,l=5+120+500+ 5 ,w= 80  ,cap=_('Add v&ar')                                  )] # &a
                  +[dict(cid='c4ma',tp='bt'  ,tid='mask' ,l=5+620+ 80+10 ,w= 80  ,cap=_('&Presets')                                  )] # &p
-                    +([] if not adva else []                        
-                 +[dict(           tp='lb'  ,tid='d4ma' ,l=5            ,w=120  ,cap=_('Demo: ')                    ,en=opdf        )] # 
+                    +([] if not adva else []
+                 +[dict(           tp='lb'  ,tid='d4ma' ,l=5            ,w=120  ,cap=_('Demo: ')                    ,en=opdf        )] #
                  +[dict(cid='d4ma',tp='ed'  ,t= 85      ,l=5+120        ,w=580+5                            ,en=opdf, ex0='1', ex1='0', ex2='1'  )] #     ro,mono,brd
-                 +[dict(cid='u4ma',tp='bt'  ,tid='d4ma' ,l=5+120+580+10 ,w= 80  ,cap=_('&Update')                   ,en=opdf        )] #  
-                 +[dict(           tp='lb'  ,tid='diff' ,l=5            ,w=120  ,cap=_('Di&ff command:'),hint=diff_h,en=opdf        )] # &f 
+                 +[dict(cid='u4ma',tp='bt'  ,tid='d4ma' ,l=5+120+580+10 ,w= 80  ,cap=_('&Update')                   ,en=opdf        )] #
+                 +[dict(           tp='lb'  ,tid='diff' ,l=5            ,w=120  ,cap=_('Di&ff command:'),hint=diff_h,en=opdf        )] # &f
                  +[dict(cid='diff',tp='cb'  ,t=115      ,l=5+120        ,w=400  ,items=diff_l                       ,en=opdf        )] #
                  +[dict(cid='dfsh',tp='ch'  ,tid='diff' ,l=5+520+ 30    ,w= 90  ,cap=_('Shell')                     ,en=opdf        )] # &t
                  +[dict(           tp='lb'  ,tid='diff' ,l=5+640        ,w=100  ,cap=_('Ma&x shown:')   ,hint=dfmx_h,en=opdf        )] # &x
                  +[dict(cid='dfmx',tp='sp-ed',tid='diff',l=5+630+100+10 ,w= 50                              ,en=opdf, ex0='0', ex1='20', ex2='1' )] #
                     )
-                 +[dict(           tp='--'  ,t=140+g1   ,l=0                                                                        )] # 
+                 +[dict(           tp='--'  ,t=140+g1   ,l=0                                                                        )] #
                  +[dict(cid='svon',tp='ch'  ,t=155+g1   ,l=5+120        ,w=290  ,cap=svon_c                         ,act=1          )] # &t
-                    +([] if not vds['svon'] else []                        
+                    +([] if not vds['svon'] else []
                  +[dict(           tp='lb'  ,tid='whon' ,l=5            ,w=120  ,cap=_('Copy to d&ir:')                             )] # &i
                  +[dict(cid='whon',tp='cb'  ,t=175+g1   ,l=5+120        ,w=500  ,items=whon_l                                       )] #
                  +[dict(cid='v4wo',tp='bt'  ,tid='whon' ,l=5+120+500+ 5 ,w= 80  ,cap=_('Add va&r')  ,hint=v4wo_h                    )] # &r
-                 +[dict(cid='b4wo',tp='bt'  ,tid='whon' ,l=5+620+80 +10 ,w= 35  ,cap=_('…')         ,hint=b4wo_h                    )] #  
+                 +[dict(cid='b4wo',tp='bt'  ,tid='whon' ,l=5+620+80 +10 ,w= 35  ,cap=_('…')         ,hint=b4wo_h                    )] #
                  +[dict(           tp='lb'  ,tid='maon' ,l=5            ,w=120  ,cap=_('Copy with na&me:')                          )] # &m
                  +[dict(cid='maon',tp='cb'  ,t=205+g1   ,l=5+120        ,w=500  ,items=maon_l                                       )] #
                  +[dict(cid='v4mo',tp='bt'  ,tid='maon' ,l=5+120+500+ 5 ,w= 80  ,cap=_('Ad&d var')  ,hint=v4mo_h                    )] # &d
                  +[dict(cid='c4mo',tp='bt'  ,tid='maon' ,l=5+620+80 +10 ,w= 80  ,cap=_('Pre&sets')                                  )] # &s
-                    +([] if not adva else []                        
-                 +[dict(           tp='lb'  ,tid='d4mo' ,l=5            ,w=120  ,cap=_('Demo: ')                                    )] # 
+                    +([] if not adva else []
+                 +[dict(           tp='lb'  ,tid='d4mo' ,l=5            ,w=120  ,cap=_('Demo: ')                                    )] #
                  +[dict(cid='d4mo',tp='ed'  ,t=235      ,l=5+120        ,w=580+5                                    ,ex0='1', ex1='0', ex2='1'  )] #     ro,mono,brd
-                 +[dict(cid='u4mo',tp='bt'  ,tid='d4mo' ,l=5+120+580+10 ,w= 80  ,cap=_('&Update')                                   )] #  
+                 +[dict(cid='u4mo',tp='bt'  ,tid='d4mo' ,l=5+120+580+10 ,w= 80  ,cap=_('&Update')                                   )] #
                     )
                     )
-                 +[dict(           tp='--'  ,t=DLGH-45  ,l=0                                                                        )] # 
+                 +[dict(           tp='--'  ,t=DLGH-45  ,l=0                                                                        )] #
                  +[dict(cid='more',tp='bt'  ,t=DLGH-30  ,l=5            ,w=100  ,cap=_('L&ess <<') if adva else _('Mor&e >>')       )] # &e
-                    +([] if not adva else []                        
+                    +([] if not adva else []
                  +[dict(           tp='lb'  ,tid='-'    ,l=5+120        ,w= 80  ,cap=_('Variant&:')                                 )] # &:
                  +[dict(cid='vrns',tp='cb-ro',tid='-'   ,l=5+120+ 80    ,w=160  ,items=vrns_l                       ,act=1          )] #
                     )
                  +[dict(cid='?'   ,tp='bt'  ,tid='-'    ,l=DLGW-260     ,w=80   ,cap=_('&Help')                                     )] # &h
                  +[dict(cid='!'   ,tp='bt'  ,tid='-'    ,l=DLGW-175     ,w=80   ,cap=_('OK')                        ,ex0='1'      )] #     default
-                 +[dict(cid='-'   ,tp='bt'  ,t=DLGH-30  ,l=DLGW-90      ,w=80   ,cap=_('Cancel')                                    )] #  
+                 +[dict(cid='-'   ,tp='bt'  ,t=DLGH-30  ,l=DLGW-90      ,w=80   ,cap=_('Cancel')                                    )] #
                 )#NOTE: cfg
             aid, vals,fid,chds = dlg_wrapper(f(_('Configure "Backup File" ({})'), VERSION_V), DLGW, DLGH, cnts, vals, focus_cid=fid)
             if aid is None or aid=='-':    return#while True
             pass;              #LOG and log('vals={}',(vals))
-            
+
             vds.update({k:v for (k,v) in vals.items() if k in ('wher', 'mask', 'opdf', 'diff', 'dfsh', 'dfmx', 'svon', 'whon', 'maon')})
             if aid=='more':
                 adva    = not adva
@@ -641,7 +658,7 @@ class Command:
                 if vds['svon']:
                     fid     = 'whon'
                     continue
-            
+
             if aid in ('b4wh', 'b4wo'):
                 fold    = CdSw.dlg_dir('')
                 if fold is None:   continue
@@ -676,13 +693,14 @@ class Command:
                         +['{ss}                   \t'+_('Current seconds as 09')]
                         +['{APP_DIR}              \t'+_('CudaText folder path')]
                         +['{APP_DRIVE}            \t'+_('CudaText drive/disk letter (Windows only)')]
+                        +['{APP_DIR_DATA}         \t'+_('CudaText data-folder')]
                         )+([] if aid not in ('v4ma', 'v4mo') else []
                         +['{COUNTER}              \t'+_('Auto-incremented as: 1, 2, 3, 4, 5, …')]
                         +['{COUNTER|lim:3}        \t'+_('Auto-incremented as: 1, 2, 3, 1, 2, …')]
                         +['{COUNTER|w:2}          \t'+_('Auto-incremented as: 01, 02, 03, 04, …')]
                         +['{COUNTER|lim:3|w:2}    \t'+_('Auto-incremented as: 01, 02, 03, 01, …')]
                         )
-                prms_l +=['{'+pj_k+'}             \t'+pj_v 
+                prms_l +=['{'+pj_k+'}             \t'+pj_v
                             for pj_k, pj_v in get_proj_vars().items()]
 #               prm_i   = CdSw.dlg_menu(CdSw.MENU_LIST, '\n'.join(prms_l))
                 prm_i   = CdSw.dlg_menu(app.DMENU_LIST_ALT, '\n'.join(prms_l))
@@ -695,7 +713,7 @@ class Command:
                 vals[id]+= prms_l[prm_i].split('\t')[0].strip()
                 fid     = id
                 vds.update({k:v for (k,v) in vals.items() if k in ('wher', 'mask', 'opdf', 'diff', 'dfsh', 'dfmx', 'svon', 'whon', 'maon')})
-                
+
             if aid == 'c4ma':
                 rds_l   =([]
                         +[_('name.25-01-17.ext\t{FILE_STEM}.{DD}-{MM}-{YY}.{FILE_EXT}')]
@@ -709,7 +727,7 @@ class Command:
                 vals['mask']= rds_l[rd_i].split('\t')[1]
                 fid     = 'mask'
                 vds.update({k:v for (k,v) in vals.items() if k in ('wher', 'mask', 'opdf', 'diff', 'dfsh', 'dfmx', 'svon', 'whon', 'maon')})
-            
+
             if aid == 'c4mo':
                 rds_l   =([]
                         +[_('name.bak.ext\t{FILE_STEM}.bak.{FILE_EXT}')]
@@ -725,7 +743,7 @@ class Command:
                 vals['maon']= rds_l[rd_i].split('\t')[1]
                 fid     = 'maon'
                 vds.update({k:v for (k,v) in vals.items() if k in ('wher', 'mask', 'opdf', 'diff', 'dfsh', 'dfmx', 'svon', 'whon', 'maon')})
-            
+
             if aid=='!':
                 if not vals['wher'].strip():
                     app.msg_status(_('Fill "Copy to dir"'))
@@ -747,7 +765,7 @@ class Command:
                 vrn_data.update(vds)
                 save_cfg(stores)
                 break#while
-            
+
             stores['wher_hist'] = add_to_history(vds['wher'],  stores.get('wher_hist', []), MAX_HIST, unicase=(os.name=='nt'))
             stores['mask_hist'] = add_to_history(vds['mask'],  stores.get('mask_hist', []), MAX_HIST, unicase=(os.name=='nt'))
             stores['diff_hist'] = add_to_history(vds['diff'],  stores.get('diff_hist', []), MAX_HIST, unicase=(os.name=='nt'))
@@ -756,7 +774,7 @@ class Command:
             stores['adva']      = adva
             save_cfg(stores)
            #while
-        
+
         self.save_on= vrn_data.get('svon', self.def_svon)
         return True
        #def dlg_config
@@ -795,14 +813,15 @@ the following macros are processed.     (If path is 'p1/p2/p3/stem.ext')
     {YY} {YYYY}           - Year    as  '17' or '2017'
     {M} {MM} {MMM} {MMMM} - Month   as  '7' or '07' or 'jul' or 'July'
     {D} {DD}              - Day     as  '7' or '07'
-    {h} {hh}              - Hours   as  '7' or '07' 
-    {m} {mm}              - Minutes as  '7' or '07' 
-    {s} {ss}              - Seconds as  '7' or '07' 
+    {h} {hh}              - Hours   as  '7' or '07'
+    {m} {mm}              - Minutes as  '7' or '07'
+    {s} {ss}              - Seconds as  '7' or '07'
     {COUNTER}             - Auto-incremented number
     {APP_DIR}             - CudaText folder path
     {APP_DRIVE}           - CudaText drive/disk letter (Windows only)
- 
-Filters. 
+    {APP_DIR_DATA}        - CudaText data-folder
+
+Filters.
 All macros can include suffix (function) to transform value.
    {Data|fun}             - gets fun({Data})
    {Data|fun:p1,p2}       - gets fun({Data},p1,p2)
@@ -824,7 +843,7 @@ Predefined filters are:
 Predefined filters for {COUNTER} are:
     w:N   - set width for value
     lim:N - set maximum value
-    Examples: 
+    Examples:
         {COUNTER}           -> 1 -> 2 -> 3 -> 4 -> 5 -> …
         {COUNTER|w:3}       -> 001 -> 002 -> 003 -> …
         {COUNTER|lim:3}     -> 1 -> 2 -> 3 -> 1 -> 2 -> …
