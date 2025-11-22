@@ -1,20 +1,20 @@
 0.9.12 (2025-11-21)
-+ support macros {APP_DIR_DATA}
-+ open diff-tab
-* small fixes
++ add: support macro {APP_DIR_DATA}
++ add: after running 'diff' program, open diff-results in a new tab
+- fix: small fixes
 
 0.9.11 (2023-02-24)
-+ support macros {APP_DIR} and {APP_DRIVE}
-- fixed: Help dialog memo was not read-only and had not fixed font
++ add: support macros {APP_DIR} and {APP_DRIVE}
+- fix: Help-dialog memo was not read-only and had not fixed font
 
 0.9.9 (2021-03-03)
-- fixed: i18n
+- fix: i18n
 
 0.9.8 (2017-02-07)
-+ support both SynWrite+CudaText
++ add: support both SynWrite+CudaText
 
 0.8.5 (2017-02-05)
-+ add opt to skip diff
++ add: option to skip diff
 
 0.5.0 (2017-01-23)
-initial
+initial version
