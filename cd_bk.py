@@ -417,7 +417,10 @@ class Command:
         with tempfile.NamedTemporaryFile(mode='w', delete=False) as tmp_f:
             tmp_f_path = tmp_f.name
             tmp_f.write(ed_self.get_text_all())
-            sp_ = subprocess.Popen('diff -u ' + cf_path + ' ' + tmp_f_path, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            diff_ = vrn_data['diff']
+            diff_ = diff_.replace('{COPY_PATH}', cf_path)
+            diff_ = diff_.replace('{FILE_PATH}', tmp_f_path)
+            sp_ = subprocess.Popen(diff_, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout_output, stderr_output = sp_.communicate()
             if sp_.returncode != 0:
                 try:
