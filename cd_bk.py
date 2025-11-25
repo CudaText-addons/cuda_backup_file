@@ -3,11 +3,11 @@ Authors:
     Andrey Kvichansky    (kvichans on github.com)
     Alexey Torgashin (CudaText)
 Version:
-    '0.9.12 2025-11-21'
+    '0.9.13 2025-11-25'
 ToDo: (see end of file)
 '''
 
-import  re, os, shutil, sys, datetime, json, collections, itertools, subprocess
+import  re, os, shutil, sys, datetime, json, collections, itertools, subprocess, tempfile
 from    fnmatch         import fnmatch
 import  cudatext            as app
 from    cudatext        import ed
@@ -413,11 +413,18 @@ class Command:
             except:
                 CdSw.msg_status_alt(f(_('Cannot create backup copy: invalid dir "{}"'), sv_dir), 6)
                 return
-        try:
-            shutil.copyfile(cf_path, sv_path)
-        except:
-            CdSw.msg_status_alt(f(_('Cannot create backup copy: invalid path "{}"'), sv_path), 6)
-            return
+        # not save same backups
+        with tempfile.NamedTemporaryFile(mode='w', delete=False) as tmp_f:
+            tmp_f_path = tmp_f.name
+            tmp_f.write(ed_self.get_text_all())
+            sp_ = subprocess.Popen('diff -u ' + cf_path + ' ' + tmp_f_path, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdout_output, stderr_output = sp_.communicate()
+            if sp_.returncode != 0:
+                try:
+                    shutil.copyfile(cf_path, sv_path)
+                except:
+                    CdSw.msg_status_alt(f(_('Cannot create backup copy: invalid path "{}"'), sv_path), 6)
+                    return
         # CdSw.msg_status_alt(f(_('Create backup: {}'), sv_path), 3)
         app.msg_status(f(_('Create backup: {}'), sv_path))
         pass;                   LOG and log('ok',())
