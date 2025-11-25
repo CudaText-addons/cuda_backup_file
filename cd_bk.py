@@ -414,13 +414,13 @@ class Command:
                 CdSw.msg_status_alt(f(_('Cannot create backup copy: invalid dir "{}"'), sv_dir), 6)
                 return
         # not save same backups
-        with tempfile.NamedTemporaryFile(mode='w', delete=False) as tmp_f:
+        with tempfile.NamedTemporaryFile(mode='w') as tmp_f:
             tmp_f_path = tmp_f.name
             tmp_f.write(ed_self.get_text_all())
             diff_ = vrn_data['diff']
             diff_ = diff_.replace('{COPY_PATH}', cf_path)
             diff_ = diff_.replace('{FILE_PATH}', tmp_f_path)
-            sp_ = subprocess.Popen(diff_, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            sp_ = subprocess.Popen(diff_, shell=vrn_data['dfsh'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout_output, stderr_output = sp_.communicate()
             if sp_.returncode != 0:
                 try:
