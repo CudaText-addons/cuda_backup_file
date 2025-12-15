@@ -3,7 +3,7 @@ Authors:
     Andrey Kvichansky    (kvichans on github.com)
     Alexey Torgashin (CudaText)
 Version:
-    '0.9.13 2025-11-25'
+    '0.9.14 2025-12-15'
 ToDo: (see end of file)
 '''
 
@@ -33,7 +33,7 @@ MAX_HIST    = CdSw.get_opt('ui_max_history_edits', 20)
 #MAX_HIST   = apx.get_opt('ui_max_history_edits', 20)
 
 DEMO_PATH   = 'demo'+os.sep+'path'+os.sep+'demofilename.demoext'
-
+IS_WIN      = os.name=='nt'
 
 get_proj_vars   = lambda:{}
 if app.__name__=='cudatext':
@@ -65,7 +65,7 @@ def width(s, w):
 #   return s if w<=len(s) else str(c)*(w-len(s))+s
 
 app_dir = app.app_path(app.APP_DIR_EXE)
-app_drv = app_dir[:2] if (os.name=='nt' and app_dir[1]==':') else ''
+app_drv = app_dir[:2] if (IS_WIN and app_dir[1]==':') else ''
 app_dir_data = app.app_path(app.APP_DIR_DATA)
 
 def get_bk_path(path:str, dr_mask:str, fn_mask:str, ops='')->str:
@@ -489,11 +489,11 @@ class Command:
         dfmx_h  = _('How many copies will be shown to compare'
                   '\r    0 - all')
 
-        stores['wher_hist'] = add_to_history(vds['wher'], stores.get('wher_hist', []), MAX_HIST, unicase=(os.name=='nt'))
-        stores['mask_hist'] = add_to_history(vds['mask'], stores.get('mask_hist', []), MAX_HIST, unicase=(os.name=='nt'))
-        stores['diff_hist'] = add_to_history(vds['diff'], stores.get('diff_hist', []), MAX_HIST, unicase=(os.name=='nt'))
-        stores['whon_hist'] = add_to_history(vds['whon'], stores.get('whon_hist', []), MAX_HIST, unicase=(os.name=='nt'))
-        stores['maon_hist'] = add_to_history(vds['maon'], stores.get('maon_hist', []), MAX_HIST, unicase=(os.name=='nt'))
+        stores['wher_hist'] = add_to_history(vds['wher'], stores.get('wher_hist', []), MAX_HIST, unicase=(IS_WIN))
+        stores['mask_hist'] = add_to_history(vds['mask'], stores.get('mask_hist', []), MAX_HIST, unicase=(IS_WIN))
+        stores['diff_hist'] = add_to_history(vds['diff'], stores.get('diff_hist', []), MAX_HIST, unicase=(IS_WIN))
+        stores['whon_hist'] = add_to_history(vds['whon'], stores.get('whon_hist', []), MAX_HIST, unicase=(IS_WIN))
+        stores['maon_hist'] = add_to_history(vds['maon'], stores.get('maon_hist', []), MAX_HIST, unicase=(IS_WIN))
         adva    = stores.get('adva', False)
         fid     = 'mask'
         while True:
@@ -776,11 +776,11 @@ class Command:
                 save_cfg(stores)
                 break#while
 
-            stores['wher_hist'] = add_to_history(vds['wher'],  stores.get('wher_hist', []), MAX_HIST, unicase=(os.name=='nt'))
-            stores['mask_hist'] = add_to_history(vds['mask'],  stores.get('mask_hist', []), MAX_HIST, unicase=(os.name=='nt'))
-            stores['diff_hist'] = add_to_history(vds['diff'],  stores.get('diff_hist', []), MAX_HIST, unicase=(os.name=='nt'))
-            stores['whon_hist'] = add_to_history(vds['whon'],  stores.get('whon_hist', []), MAX_HIST, unicase=(os.name=='nt'))
-            stores['maon_hist'] = add_to_history(vds['maon'],  stores.get('maon_hist', []), MAX_HIST, unicase=(os.name=='nt'))
+            stores['wher_hist'] = add_to_history(vds['wher'],  stores.get('wher_hist', []), MAX_HIST, unicase=(IS_WIN))
+            stores['mask_hist'] = add_to_history(vds['mask'],  stores.get('mask_hist', []), MAX_HIST, unicase=(IS_WIN))
+            stores['diff_hist'] = add_to_history(vds['diff'],  stores.get('diff_hist', []), MAX_HIST, unicase=(IS_WIN))
+            stores['whon_hist'] = add_to_history(vds['whon'],  stores.get('whon_hist', []), MAX_HIST, unicase=(IS_WIN))
+            stores['maon_hist'] = add_to_history(vds['maon'],  stores.get('maon_hist', []), MAX_HIST, unicase=(IS_WIN))
             stores['adva']      = adva
             save_cfg(stores)
            #while
@@ -799,9 +799,9 @@ class Command:
         self.def_maon   = '{FILE_STEM}.{COUNTER|w:3}.{FILE_EXT}'
         self.def_opdf   = False
         self.def_diff   = r'"c:\Program Files (x86)\WinMerge\WinMergeU.exe" "{COPY_PATH}" "{FILE_PATH}"' \
-                            if os.name=='nt' else \
+                            if IS_WIN else \
                           r'diff -u "{COPY_PATH}" "{FILE_PATH}"'
-        self.def_dfsh   = False if os.name=='nt' else True
+        self.def_dfsh   = not IS_WIN
         self.def_dfmx   = 0
 
         vrn_data    = load_cfg(ops='vrn_data')

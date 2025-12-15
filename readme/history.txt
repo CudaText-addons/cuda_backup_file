@@ -1,5 +1,6 @@
-0.9.13 (2025-11-25)
-+ add: not save same backups
+0.9.14 (2025-12-15)
++ add: avoid saving to backup the same text (by @ildarkhasanshin)
++ add: small refactor (by Alexey)
 
 0.9.12 (2025-11-21)
 + add: support macro {APP_DIR_DATA}
