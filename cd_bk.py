@@ -3,7 +3,7 @@ Authors:
     Andrey Kvichansky    (kvichans on github.com)
     Alexey Torgashin (CudaText)
 Version:
-    '0.9.15 2026-05-25'
+    '0.9.16 2026-05-25'
 ToDo: (see end of file)
 '''
 
@@ -356,9 +356,13 @@ class Command:
             diff        = diff.replace('{APP_DRIVE}'    , app_drv)
             diff        = diff.replace('{APP_DIR_DATA}' , app_dir_data)
             pass;               LOG and log('diff={}', (diff))
-            print('Backup File runs:', diff)
-            # subprocess.Popen(diff, shell=vrn_data['dfsh'])
-            sp = subprocess.Popen(diff, shell=vrn_data['dfsh'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            with_shell = vrn_data['dfsh']
+            print('Backup_File: running diff tool, ' + ('via shell' if with_shell else 'without shell') + ':', diff)
+            try:
+                sp = subprocess.Popen(diff, shell=with_shell, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            except:
+                print('ERROR: Backup_File cannot run diff tool:', diff)
+                return
             stdout_output, stderr_output = sp.communicate()
             if sp.returncode == 0:
                 print('Backup File: these files are unchanged.')
@@ -422,7 +426,11 @@ class Command:
             diff_ = diff_.replace('{FILE_PATH}', tmp_f_path)
             with_shell = vrn_data['dfsh']
             print('Backup_File: running diff tool, ' + ('via shell' if with_shell else 'without shell') + ':', diff_)
-            sp_ = subprocess.Popen(diff_, shell=with_shell, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            try:
+                sp_ = subprocess.Popen(diff_, shell=with_shell, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            except:
+                print('ERROR: Backup_File cannot run diff tool:', diff_)
+                return
             stdout_output, stderr_output = sp_.communicate()
             if sp_.returncode != 0:
                 try:
