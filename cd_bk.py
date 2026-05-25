@@ -357,7 +357,7 @@ class Command:
             diff        = diff.replace('{APP_DIR_DATA}' , app_dir_data)
             pass;               LOG and log('diff={}', (diff))
             with_shell = vrn_data['dfsh']
-            print('Backup_File: running diff tool, ' + ('via shell' if with_shell else 'without shell') + ':', diff)
+            # print('Backup_File: running diff tool, ' + ('via shell' if with_shell else 'without shell') + ':', diff)
             try:
                 sp = subprocess.Popen(diff, shell=with_shell, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             except:
@@ -425,7 +425,7 @@ class Command:
             diff_ = diff_.replace('{COPY_PATH}', cf_path)
             diff_ = diff_.replace('{FILE_PATH}', tmp_f_path)
             with_shell = vrn_data['dfsh']
-            print('Backup_File: running diff tool, ' + ('via shell' if with_shell else 'without shell') + ':', diff_)
+            # print('Backup_File: running diff tool, ' + ('via shell' if with_shell else 'without shell') + ':', diff_)
             try:
                 sp_ = subprocess.Popen(diff_, shell=with_shell, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             except:
