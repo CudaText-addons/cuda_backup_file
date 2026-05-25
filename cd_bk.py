@@ -3,7 +3,7 @@ Authors:
     Andrey Kvichansky    (kvichans on github.com)
     Alexey Torgashin (CudaText)
 Version:
-    '0.9.14 2025-12-15'
+    '0.9.15 2026-05-25'
 ToDo: (see end of file)
 '''
 
@@ -420,7 +420,9 @@ class Command:
             diff_ = vrn_data['diff']
             diff_ = diff_.replace('{COPY_PATH}', cf_path)
             diff_ = diff_.replace('{FILE_PATH}', tmp_f_path)
-            sp_ = subprocess.Popen(diff_, shell=vrn_data['dfsh'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            with_shell = vrn_data['dfsh']
+            print('Backup_File: running diff tool, ' + ('via shell' if with_shell else 'without shell') + ':', diff_)
+            sp_ = subprocess.Popen(diff_, shell=with_shell, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout_output, stderr_output = sp_.communicate()
             if sp_.returncode != 0:
                 try:
