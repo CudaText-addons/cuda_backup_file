@@ -1,5 +1,6 @@
-0.9.15 (2026-05-25)
+0.9.16 (2026-05-25)
 + add: message in Console when plugin runs diff-tool (by Alexey T.)
++ add: handle 'subprocess.Popen' exceptions nicely (by Alexey T.)
 
 0.9.14 (2025-12-15)
 + add: avoid saving to backup the same text (by @ildarkhasanshin)
