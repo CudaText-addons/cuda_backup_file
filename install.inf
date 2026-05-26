@@ -1,6 +1,6 @@
 [info]
 title=Backup File
-desc=Creates backup copy of current file, a) by command in Plugins, b) auto-creation before file saving
+desc=Creates backup copy of current file: a) by command in the Plugins-menu, b) auto-creation before file saving
 type=cudatext-plugin
 subdir=cuda_backup_file
 homepage=https://github.com/CudaText-addons/cuda_backup_file
@@ -17,6 +17,6 @@ method=copy_bk_or_compare
 
 [item99]
 section=commands
-caption=Backup File\Config...
+caption=Backup File\Configure...
 method=dlg_config
 ;menu=0
