@@ -417,29 +417,26 @@ class Command:
             except:
                 CdSw.msg_status_alt(f(_('Cannot create backup copy: invalid dir "{}"'), sv_dir), 6)
                 return
-        # not save same backups
-        with tempfile.NamedTemporaryFile(mode='w') as tmp_f:
-            tmp_f_path = tmp_f.name
-            tmp_f.write(ed_self.get_text_all())
-            diff_ = vrn_data['diff']
-            diff_ = diff_.replace('{COPY_PATH}', cf_path)
-            diff_ = diff_.replace('{FILE_PATH}', tmp_f_path)
-            with_shell = vrn_data['dfsh']
-            # print('Backup_File: running diff tool, ' + ('via shell' if with_shell else 'without shell') + ':', diff_)
-            try:
-                sp_ = subprocess.Popen(diff_, shell=with_shell, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            except:
-                print('ERROR: Backup_File cannot run diff tool:', diff_)
-                return
-            stdout_output, stderr_output = sp_.communicate()
-            if sp_.returncode != 0:
+
+        # calling of the 'diff' is to avoid saving the same content again and again
+        need_save = True
+        if not IS_WIN and shutil.which('diff'):
+            with tempfile.NamedTemporaryFile(mode='w') as tmp_f:
+                tmp_f_path = tmp_f.name
+                tmp_f.write(ed_self.get_text_all())
                 try:
-                    shutil.copyfile(cf_path, sv_path)
+                    sp_ = subprocess.Popen('diff -u "%s" "%s"'%(cf_path, tmp_f_path), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    stdout_output, stderr_output = sp_.communicate()
+                    need_save = sp_.returncode != 0
                 except:
-                    CdSw.msg_status_alt(f(_('Cannot create backup copy: invalid path "{}"'), sv_path), 6)
-                    return
-        # CdSw.msg_status_alt(f(_('Create backup: {}'), sv_path), 3)
-        app.msg_status(f(_('Create backup: {}'), sv_path))
+                    print('ERROR: Backup_File cannot run "diff" tool on Unix-like system')
+
+        if need_save:
+            try:
+                shutil.copyfile(cf_path, sv_path)
+                app.msg_status(f(_('Backup_File made backup: {}'), sv_path))
+            except:
+                CdSw.msg_status_alt(f(_('Backup_File cannot create copy: invalid path "{}"'), sv_path), 6)
         pass;                   LOG and log('ok',())
        #def on_save_pre
 
