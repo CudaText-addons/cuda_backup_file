@@ -35,6 +35,7 @@ MAX_HIST    = CdSw.get_opt('ui_max_history_edits', 20)
 DEMO_PATH   = 'demo'+os.sep+'path'+os.sep+'demofilename.demoext'
 IS_WIN      = os.name=='nt'
 DIFF_EXIST  = not IS_WIN and shutil.which('diff')
+MENU_SEP_LINE = '-------------'
 
 get_proj_vars   = lambda:{}
 if app.__name__=='cudatext':
@@ -323,7 +324,7 @@ class Command:
                     CdSw.msg_status_alt(f(_('Backup dir: {}'), sv_dir), 60)
         #           app.msg_status(f(_('Backup dir: {}'), sv_dir))
                     menu_l  =([  f(_('Copy to…\t{}'), sv_fn)                        ]     # 0
-                            + [  ':::::::::::'                                      ]     # skip
+                            + [  MENU_SEP_LINE                                      ]     # skip
                             + [  f(_('Diff with\t{}'), fn) for n,(fn,t) in prevs    ]     # 2..
                             +([] if len(prevs_a)==len(prevs) else []
                             + [  _('more…')+f('\t({})',len(prevs_a)-len(prevs))     ]     # all
@@ -332,7 +333,7 @@ class Command:
 #                   what_m  = CdSw.dlg_menu(CdSw.MENU_LIST, '\n'.join(menu_l))
                     CdSw.msg_status_alt('', 0)
         #           app.msg_status('')
-                    if None is what_m or menu_l[what_m]==':::::::::::':
+                    if None is what_m or menu_l[what_m]==MENU_SEP_LINE:
                         return
                     if 0==what_m:
                         what_p  = -1
