@@ -34,6 +34,7 @@ MAX_HIST    = CdSw.get_opt('ui_max_history_edits', 20)
 
 DEMO_PATH   = 'demo'+os.sep+'path'+os.sep+'demofilename.demoext'
 IS_WIN      = os.name=='nt'
+DIFF_EXIST  = not IS_WIN and shutil.which('diff')
 
 get_proj_vars   = lambda:{}
 if app.__name__=='cudatext':
@@ -420,7 +421,7 @@ class Command:
 
         # calling of the 'diff' is to avoid saving the same content again and again
         need_save = True
-        if not IS_WIN and shutil.which('diff'):
+        if DIFF_EXIST:
             with tempfile.NamedTemporaryFile(mode='w') as tmp_f:
                 tmp_f_path = tmp_f.name
                 tmp_f.write(ed_self.get_text_all())
@@ -429,14 +430,14 @@ class Command:
                     stdout_output, stderr_output = sp_.communicate()
                     need_save = sp_.returncode != 0
                 except:
-                    print('ERROR: Backup_File cannot run "diff" tool on Unix-like system')
+                    print('ERROR: Backup_File cannot run "diff"')
 
         if need_save:
             try:
                 shutil.copyfile(cf_path, sv_path)
-                app.msg_status(f(_('Backup_File made backup: {}'), sv_path))
+                app.msg_status(f(_('Backup_File made copy: {}'), sv_path))
             except:
-                CdSw.msg_status_alt(f(_('Backup_File cannot create copy: invalid path "{}"'), sv_path), 6)
+                print('ERROR: Backup_File cannot create copy: invalid path "%s"'%sv_path)
         pass;                   LOG and log('ok',())
        #def on_save_pre
 
