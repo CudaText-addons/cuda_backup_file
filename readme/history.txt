@@ -1,3 +1,6 @@
+0.9.19 (2026-11-21)
+- fix: avoid deprecated API: get_filename
+
 0.9.18 (2026-05-27)
 - fix: regression in 0.9.14 on Windows: plugin tried to run diff-tool which not exists (by Alexey T.)
 - fix: handle 'subprocess.Popen' exceptions nicely (by Alexey T.)

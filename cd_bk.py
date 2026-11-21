@@ -3,7 +3,7 @@ Authors:
     Andrey Kvichansky    (kvichans on github.com)
     Alexey Torgashin (CudaText)
 Version:
-    '0.9.18 2026-05-27'
+    '0.9.19 2026-11-21'
 ToDo: (see end of file)
 '''
 
@@ -245,7 +245,7 @@ def load_cfg(modify=False, ops=''):
 class Command:
 
     def copy_bk_or_compare(self):#NOTE: menuBK
-        cf_path     = ed.get_filename()
+        cf_path     = ed.get_prop(app.PROP_FN, '')
         if not cf_path: return
         if ed.get_prop(app.PROP_MODIFIED) and \
             app.msg_box(  _('Text modified!'
@@ -401,7 +401,7 @@ class Command:
     def on_save_pre(self, ed_self):#NOTE: on_save_pre
         pass;                  #LOG and log('',())
         if not self.save_on: return
-        cf_path = ed.get_filename()
+        cf_path = ed.get_prop(app.PROP_FN, '')
         if not cf_path: return
         pass;                  #LOG and log('??',())
         vrn_data= load_cfg(ops='vrn_data')
@@ -459,7 +459,7 @@ class Command:
            #def add_to_history
 
         # Currenf file
-        cf_path = ed.get_filename()
+        cf_path = ed.get_prop(app.PROP_FN, '')
         cf_path = cf_path if os.path.isfile(cf_path) else DEMO_PATH
 
         # Stored options and its copies
